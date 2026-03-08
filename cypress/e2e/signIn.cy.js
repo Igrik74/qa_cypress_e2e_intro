@@ -1,22 +1,24 @@
 /// <reference types="cypress" />
 
 describe('Sign In page', () => {
-  beforeEach(() => {
-    cy.visit('https://conduit.mate.academy/user/login');
-  });
-
   it('should provide an ability to log in', () => {
-    const email = 'test1234567@gmail.com';
-    const pw = 'test1234567';
+    const email = 'qa_user_001@gmail.com';
+    const pw = 'qa_user_001';
+    const username = 'qa_user_001';
 
-    cy.get('h1').should('have.text', 'Sign in');
+    cy.visit('https://conduit.mate.academy/user/login');
 
-    cy.get('input[placeholder="Email"]').type(email);
-    cy.get('input[placeholder="Password"]').type(pw);
+    cy.intercept('POST', '**/users/login').as('login');
 
-    cy.get('button.btn').click();
+    cy.get('h1').should('contain.text', 'Sign in');
+    cy.get('[placeholder=Email]').type(email);
+    cy.get('[placeholder=Password]').type(pw);
 
-    cy.contains('a.nav-link', 'test1234567')
+    cy.get('.btn').click();
+
+    cy.wait('@login').its('response.statusCode').should('eq', 200);
+
+    cy.contains('a.nav-link', username, { timeout: 10000 })
       .should('be.visible');
   });
 });
